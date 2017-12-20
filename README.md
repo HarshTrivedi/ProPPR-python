@@ -66,7 +66,7 @@ predict(train00009,Y)	+predict(train00009,neg)	-predict(train00009,pos)
 
 Now, the input datatset is prepared!
 
-Parsing of the ProPPR program, building dataset of facts and rules and indexing them for quick lookup is handled by `lib/parse.py`. Next, we want to train our model with training examples. However, we need to ground each of the example queries into grounded SLD resolution graphs. We also need to annotate these SLD graphs with dynamically instantiated features from feature templates. All of this, can be done with:
+Parsing of the ProPPR program, building dataset of facts and rules and indexing them for quick lookup is handled by `lib/parse.py`. And everything related to FOL unification, mgu, substitution compositon etc are handled by `lib/unification.py`. Next, we want to train our model with training examples. However, we need to ground each of the example queries into grounded SLD resolution graphs. We also need to annotate these SLD graphs with dynamically instantiated features from feature templates. All of this, can be done with:
 
 ```
 python build_ground_sld.py
