@@ -3,28 +3,36 @@ from copy import deepcopy
 from collections import defaultdict
 import os
 
+
 class Symbol:
-    def __init__ (self, name):
+
+    def __init__(self, name):
         self.name = name
-            
+
     def __str__(self):
         return self.name
 
+
 class Constant(Symbol):
-    def value(self): 
+
+    def value(self):
         return self.name
+
 
 class Variable(Symbol):
     pass
 
+
 class Relation(Symbol):
     pass
+
 
 def symbol(name):
     if (name[0] in name.upper()):
         return Variable(name)
     else:
         return Constant(name)
+
 
 # !! Hey atom could be constant as well!!! Right?
 class Atom:
@@ -39,14 +47,15 @@ class Atom:
         argument_texts = array[1:]
         arguments = []
         for argument_text in argument_texts:
-            arguments.append( symbol(argument_text) )
+            arguments.append(symbol(argument_text))
         self.relation = relation
         self.arguments = arguments
 
     def rename(self):
         atom = deepcopy(self)
         for argument in atom.arguments:
-            argument.name = argument.name + '_' if isinstance(argument, Variable) else argument.name
+            argument.name = argument.name + '_' if isinstance(
+                argument, Variable) else argument.name
         return atom
 
     def apply_substitution(self, substitution):
@@ -57,21 +66,28 @@ class Atom:
         return atom
 
     def __str__(self):
-        return ''.join([str(self.relation), '(', ','.join([ str(arg) for arg in self.arguments]), ')'])
+        return ''.join([
+            str(self.relation), '(',
+            ','.join([str(arg) for arg in self.arguments]), ')'
+        ])
 
     def __len__(self):
         return len(self.arguments)
 
+
 # this doesn't handle functors yet
 def parse_atom(atom_str):
-    match = re.match( '(.+)\((.+)\)', atom_str )
+    match = re.match('(.+)\((.+)\)', atom_str)
     relation_name = match[1]
     arguments_str = match[2]
-    arguments = arguments_str.split(',')    
-    relation  = Relation(relation_name)
+    arguments = arguments_str.split(',')
+    relation = Relation(relation_name)
+
     def symbol(name):
-        return Variable(name) if (name[0] in string.uppercase) else Constant(name)
-    arguments = [ symbol(argument) for argument in arguments]
+        return Variable(name) if (
+            name[0] in string.uppercase) else Constant(name)
+
+    arguments = [symbol(argument) for argument in arguments]
     return Atom(relation, arguments)
 
 
@@ -79,26 +95,30 @@ class Database:
 
     def __init__(self, name, input_dir):
         self.rules = []
-        self.name  = name
+        self.name = name
         self.input_dir = input_dir
 
-        self.path_ppr       = os.path.join(self.input_dir, self.name, self.name + '.ppr')
-        self.path_cfacts    = os.path.join(self.input_dir, self.name, self.name + '.cfacts')
-        self.path_graph     = os.path.join(self.input_dir, self.name, self.name + '.graph')
-        self.path_train_examples  = os.path.join(self.input_dir, self.name, self.name + '-train.examples')
-        self.path_test_examples   = os.path.join(self.input_dir, self.name, self.name + '-test.examples')
+        self.path_ppr = os.path.join(self.input_dir, self.name,
+                                     self.name + '.ppr')
+        self.path_cfacts = os.path.join(self.input_dir, self.name,
+                                        self.name + '.cfacts')
+        self.path_graph = os.path.join(self.input_dir, self.name,
+                                       self.name + '.graph')
+        self.path_train_examples = os.path.join(self.input_dir, self.name,
+                                                self.name + '-train.examples')
+        self.path_test_examples = os.path.join(self.input_dir, self.name,
+                                               self.name + '-test.examples')
 
     def insert_rule(self, head, body, features):
         self.rules.append((head, body, features))
-
 
     @staticmethod
     def rename_rule(rule):
 
         head, body, features = rule
         head = head.rename()
-        body = [ atom.rename() for atom in body]
-        features = [ feature.rename() for feature in features]
+        body = [atom.rename() for atom in body]
+        features = [feature.rename() for feature in features]
         return [head, body, features]
 
     def build_index(self):
@@ -108,15 +128,15 @@ class Database:
             ground_tokens = [head_atom.relation.name]
             for argument in head_atom.arguments:
                 if argument.name[0].islower():
-                    ground_tokens.append( argument.name )
+                    ground_tokens.append(argument.name)
             for token in ground_tokens:
                 db_index[token].add(idx)
         self.db_index = db_index
 
     def get_rules_with_tokens(self, tokens):
-        rule_idxs = set.intersection(*[ self.db_index[token] for token in tokens])
-        return [ self.rules[rule_idx] for rule_idx in rule_idxs]
-
+        rule_idxs = set.intersection(
+            *[self.db_index[token] for token in tokens])
+        return [self.rules[rule_idx] for rule_idx in rule_idxs]
 
     def load_ppr(self):
 
@@ -133,7 +153,7 @@ class Database:
                 head = head.strip()
                 body_parts = body_parts.strip()
                 if '{' in body_parts and '}' in body_parts:
-                    match = re.match( '([^{}]+)?({.+})?', body_parts.strip() )
+                    match = re.match('([^{}]+)?({.+})?', body_parts.strip())
                     body = match.group(1)
                     if not body:
                         body_atoms = []
@@ -141,10 +161,12 @@ class Database:
                         body = body.replace(".", '').replace(' ', '')
                         body_atoms = body.replace('),', ');').split(';')
                     features = match.group(2)
-                    feature_atoms = tuple(features.replace(' ', '').replace('{', '').replace('}', '').split(':'))
+                    feature_atoms = tuple(
+                        features.replace(' ', '').replace('{', '').replace(
+                            '}', '').split(':'))
                     head_atom = head.strip()
                 elif '#' in body_parts:
-                    match = re.match( '(.+)#(.+)', body_parts.strip() )
+                    match = re.match('(.+)#(.+)', body_parts.strip())
                     body = match.group(1)
                     if not body:
                         body_atoms = []
@@ -165,8 +187,7 @@ class Database:
                     feature_atoms = ()
 
                 head_atom = Atom(head_atom)
-                body_atoms = [ Atom(atom) for atom in body_atoms]
-
+                body_atoms = [Atom(atom) for atom in body_atoms]
 
                 # feature_atoms would always be a tuple ()
                 # of 0 or 1 or 2 elements
@@ -176,9 +197,12 @@ class Database:
                 elif len(feature_atoms) == 1:
                     feature_atoms = [Atom(feature_atoms[0])]
                 else:
-                    feature_atoms = [Atom(feature_atoms[0]), Atom(feature_atoms[1])]
+                    feature_atoms = [
+                        Atom(feature_atoms[0]),
+                        Atom(feature_atoms[1])
+                    ]
 
-                self.insert_rule( head_atom, body_atoms, feature_atoms)
+                self.insert_rule(head_atom, body_atoms, feature_atoms)
 
     def load_cfacts(self):
 
@@ -187,21 +211,19 @@ class Database:
                 array = line.strip().split('\t')
                 relation = array[0]
                 arguments = array[1:]
-                atom_str = relation+'('+','.join(arguments)+')'
-                head = Atom( atom_str )
-                self.insert_rule( head, [], [] )
+                atom_str = relation + '(' + ','.join(arguments) + ')'
+                head = Atom(atom_str)
+                self.insert_rule(head, [], [])
 
-        
     def load_graph(self):
         with open(self.path_graph) as f:
             for line in f.readlines():
                 array = line.strip().split('\t')
                 relation = array[0]
                 arguments = array[1:]
-                atom_str = relation+'('+','.join(arguments)+')'
-                head = Atom( atom_str )
-                self.insert_rule( head, [], [] )
-
+                atom_str = relation + '(' + ','.join(arguments) + ')'
+                head = Atom(atom_str)
+                self.insert_rule(head, [], [])
 
 
 ########################################
@@ -276,18 +298,6 @@ class Database:
 # #########################################
 # #########################################
 
-
-
-
-
-
 # ToDo Next:
 # 1. How to check that solution substitution is actually correct or incorrect
 # 0. Lets leave it for now and try to see if other things work. Label adding can be done later!
-
-
-
-
-
-
-
