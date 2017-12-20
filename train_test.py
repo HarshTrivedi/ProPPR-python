@@ -22,15 +22,15 @@ np.set_printoptions(threshold=np.nan)
 
 ##############################################################################
 ###################### (START) CONFIGURATION #################################
-
+run = "Learn"      # Predict or Learn
+# run = "Predict"  # Predict or Learn
+###################### (END) CONFIGURATION #################################
 
 processed_data_dir = os.path.join('ProcessedData', program_name)
 feature_vector_size_path = os.path.join( processed_data_dir, 'feat_size.txt' )
 with open(feature_vector_size_path, 'r') as f:
     edge_feature_vector_size = int(f.read().strip())
 
-# run = "Learn"    # Predict or Learn
-run = "Predict"  # Predict or Learn
 
 feature_weights    = tf.ones([edge_feature_vector_size, 1], dtype = np.float32)
 one_hot_query_vector = tf.placeholder( tf.float32, [ None, 1 ] )
@@ -214,7 +214,7 @@ with tf.Session() as sess:
             auc_mean = np.mean(aucs)
             print( "MRR: {}".format(mmr_mean) )
             print( "AUC: {}".format(auc_mean) )
-            # print('')
+            print('')
 
             for idx in tensor_idxs:
                 sess.run( train_step, feed_dict = feed_dict[idx] )

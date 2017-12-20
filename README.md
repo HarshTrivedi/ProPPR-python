@@ -89,6 +89,11 @@ For visualization purpose, the script also generates `sample.features` which enl
 
 ```
 # sample.features
+f(yesterday,pos)
+f(truck,neg)
+f(automatic,pos)
+f(minivan,neg)
+f(red,neg)
 ...
 ```
 
@@ -104,18 +109,54 @@ It will create a directory `ProcessedData/sample/Tensors/` and store the sparse 
 Lastly, the learning is done using following script:
 
 ```
-python train.py
+python train_test.py
 ```
 
 As the script runs, it logs the dropping loss value and increasing MMR/AUC with increase in epoch. For our sample dataset, only 1 epoch is more than enough for reaching perfect AUC and MMR. Following is the expected output.
 
 ```
-<.. fill this up ...>
+Computation Graph Built
+In Learn Mode
+
+Epoch: 0
+Loss: 0.0
+MRR: 0.5
+AUC: 0.5
+
+Epoch: 1
+Loss: -0.00112915039062
+MRR: 1.0
+AUC: 1.0
+
+Epoch: 2
+Loss: -0.00263977050781
+MRR: 1.0
+AUC: 1.0
+
+Epoch: 3
+Loss: -0.00416564941406
+MRR: 1.0
+AUC: 1.0
+
+Epoch: 4
+Loss: -0.00576782226562
+MRR: 1.0
+AUC: 1.0
+
+Epoch: 5
+Loss: -0.00743103027344
+MRR: 1.0
+AUC: 1.0
+
+Epoch: 6
+Loss: -0.00909423828125
+MRR: 1.0
+AUC: 1.0
+...
 ```
+On our simple KB, just one epoch was enough for reaching perfect AUC and MMR. You can also see the loss decreasing with epochs as intended. Once 10 epochs are complete, it automatically saves the best performing model in `ProcessedData/sample/model/`. This trained model can be used later anytime.
 
-Once 10 epochs are complete, it automatically saves the best performing model in `ProcessedData/sample/model/`. This trained model can be used later anytime.
-
-The script `train.py` can be run in 2 modes: `Learn` or `Predict`. Default is `Learn`  mode which we just used to create the model. `Predict` mode can be used check AUC/MMR on test or train data. The modes can be toggled with variable `run` in first few lines of the script.
+The script `train_test.py` can be run in 2 modes: `Learn` or `Predict`. Default is `Learn`  mode which we just used to create the model. `Predict` mode can be used check AUC/MMR on test or train data. The modes can be toggled with variable `run` in first few lines of the script.
 
 
 
