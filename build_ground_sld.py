@@ -194,6 +194,10 @@ class Sld:
                         new_node_id: deepcopy(new_node_goals)
                     })
 
+                    # this seems wrong. rule id should be used!
+                    if feature_ids == []:
+                        feature_ids = [ Sld.feature2idx['unk'] ]
+
                     self.graph.add_edge(
                         node_id, new_node_id, mgu=mgu, feat=feature_ids)
 
@@ -372,6 +376,10 @@ if __name__ == "__main__":
         for sld_graph in sld_graphs:
             sld_dump_str = sld_graph.dump()
             sld_dump_strs.append(sld_dump_str)
+
+        ground_path = os.path.join(processed_data_dir, program_name + '-{}.grounded'.format(set_name) )
+        with open(ground_path, 'w') as f:
+            f.write('\n'.join(sld_dump_strs))
 
     feature_index_path = os.path.join(processed_data_dir,
                                       program_name + '.features')

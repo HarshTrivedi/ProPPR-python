@@ -220,7 +220,7 @@ with tf.Session() as sess:
         results = []
         best_mmr = 0.0
         best_epoch = 0
-        for i in range(10):
+        for i in range(5):
 
             mrrs = []
             aucs = []
